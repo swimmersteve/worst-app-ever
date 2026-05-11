@@ -1,0 +1,24 @@
+{
+  "permissions": {
+    "allow": [
+      "PowerShell(Get-ChildItem \"C:\\\\Users\\\\steve\\\\WorseAppEver\" -Hidden | ForEach-Object { $_.FullName })",
+      "PowerShell($dirInfo = Get-Item \"C:\\\\Users\\\\steve\\\\WorseAppEver\"; Write-Host \"Directory: $\\($dirInfo.FullName\\)\"; Write-Host \"Exists: $\\($dirInfo.Exists\\)\"; Write-Host \"Empty \\(files\\): $\\(\\(Get-ChildItem -File | Measure-Object\\).Count -eq 0\\)\")",
+      "Bash(dotnet --version)",
+      "Bash(dotnet --list-sdks)",
+      "PowerShell(dotnet --version; dotnet --list-sdks)",
+      "PowerShell(dotnet --version)",
+      "Read(//mnt/c/Users/steve/**)",
+      "Bash(cmd /c \"ren \\\\\"C:\\\\Users\\\\steve\\\\WorseAppEver\\\\src\\\\WorseAppEver\\\\\" WorstAppEver\")",
+      "Bash(dir C:\\\\Users\\\\steve\\\\WorseAppEver\\\\src *)",
+      "PowerShell(Move-Item *)",
+      "PowerShell(Rename-Item *)",
+      "PowerShell(dotnet clean \"C:\\\\Users\\\\steve\\\\WorseAppEver\\\\src\\\\WorstAppEver\\\\WorstAppEver.csproj\" -c Release; dotnet build \"C:\\\\Users\\\\steve\\\\WorseAppEver\\\\src\\\\WorstAppEver\\\\WorstAppEver.csproj\" -c Release)",
+      "Bash(dotnet clean *)",
+      "Bash(dotnet build *)",
+      "PowerShell(Test-Path *)"
+    ]
+  },
+  "enabledPlugins": {
+    "superpowers@claude-plugins-official": true
+  }
+}

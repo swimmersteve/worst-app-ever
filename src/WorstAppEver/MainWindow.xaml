@@ -1,0 +1,394 @@
+﻿<Window x:Class="WorstAppEver.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:conv="clr-namespace:WorstAppEver.Converters"
+        Title="Worst App Ever — Bad UX Simulator"
+        Height="680" Width="860"
+        MinHeight="580" MinWidth="740"
+        Background="{StaticResource WindowBg}"
+        WindowStartupLocation="CenterScreen"
+        FontFamily="Segoe UI">
+
+    <Window.Resources>
+        <conv:BoolToColorConverter x:Key="BoolToColor"
+                                   TrueColor="{StaticResource AccentRed}"
+                                   FalseColor="#333333"/>
+        <conv:BoolToStatusTextConverter x:Key="BoolToStatus"
+                                        TrueText="Active" FalseText="Idle"/>
+    </Window.Resources>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="56"/>   <!-- Header -->
+            <RowDefinition Height="*"/>    <!-- Tabs -->
+            <RowDefinition Height="36"/>   <!-- Status bar -->
+        </Grid.RowDefinitions>
+
+        <!-- ═══ HEADER ═══════════════════════════════════════════════════════ -->
+        <Border Grid.Row="0" Background="#141414" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,0,1">
+            <Grid Margin="16,0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                    <TextBlock Text="⚠" Foreground="{StaticResource AccentRed}" FontSize="20" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                    <TextBlock Text="Worst App Ever" Foreground="{StaticResource TextPrimary}" FontSize="18" FontWeight="Bold" VerticalAlignment="Center"/>
+                    <TextBlock Text="  Bad UX Simulator" Foreground="{StaticResource TextMuted}" FontSize="13" VerticalAlignment="Center" Margin="4,2,0,0"/>
+                </StackPanel>
+                <Border Grid.Column="1" Background="#2A1A1A" CornerRadius="12" Padding="10,4" VerticalAlignment="Center"
+                        BorderBrush="{StaticResource AccentRed}" BorderThickness="1">
+                    <TextBlock x:Name="AdminBadge" Text="⚡ Administrator" Foreground="{StaticResource AccentRed}" FontSize="11" FontWeight="SemiBold"/>
+                </Border>
+            </Grid>
+        </Border>
+
+        <!-- ═══ TAB CONTROL ══════════════════════════════════════════════════ -->
+        <TabControl Grid.Row="1" Background="{StaticResource WindowBg}"
+                    BorderThickness="0" Padding="0">
+            <TabControl.Resources>
+                <Style TargetType="TabItem" BasedOn="{StaticResource DarkTabItem}"/>
+            </TabControl.Resources>
+
+            <!-- ─── CRASH TAB ──────────────────────────────────────────────── -->
+            <TabItem Header="💥 Crash">
+                <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="20,16">
+                    <StackPanel>
+                        <Border Style="{StaticResource WarningBox}">
+                            <TextBlock Foreground="#FF8080" FontSize="12" TextWrapping="Wrap">
+                                All crash scenarios terminate this process immediately. The app will close without warning. Windows Event Viewer will log an application error entry.
+                            </TextBlock>
+                        </Border>
+
+                        <Border Style="{StaticResource Card}">
+                            <StackPanel>
+                                <TextBlock Text="Access Violation" Style="{StaticResource SectionHeader}"/>
+                                <TextBlock Style="{StaticResource DescText}">Reads from memory address 0x0. CLR raises a SEH access violation and the process is terminated by Windows Error Reporting.</TextBlock>
+                                <Button Content="Trigger Access Violation" Style="{StaticResource DangerButton}"
+                                        HorizontalAlignment="Left"
+                                        Command="{Binding Crash.AccessViolationCommand}"/>
+                            </StackPanel>
+                        </Border>
+
+                        <Border Style="{StaticResource Card}">
+                            <StackPanel>
+                                <TextBlock Text="Stack Overflow" Style="{StaticResource SectionHeader}"/>
+                                <TextBlock Style="{StaticResource DescText}">Calls itself recursively until the call stack is exhausted. The CLR cannot handle this — no managed exception is raised. Process terminates immediately.</TextBlock>
+                                <Button Content="Trigger Stack Overflow" Style="{StaticResource DangerButton}"
+                                        HorizontalAlignment="Left"
+                                        Command="{Binding Crash.StackOverflowCommand}"/>
+                            </StackPanel>
+                        </Border>
+
+                        <Border Style="{StaticResource Card}">
+                            <StackPanel>
+                                <TextBlock Text="Unhandled Exception" Style="{StaticResource SectionHeader}"/>
+                                <TextBlock Style="{StaticResource DescText}">Throws an InvalidOperationException with no enclosing catch block. The CLR's UnhandledException handler fires, then WER terminates the process.</TextBlock>
+                                <Button Content="Trigger Unhandled Exception" Style="{StaticResource DangerButton}"
+                                        HorizontalAlignment="Left"
+                                        Command="{Binding Crash.UnhandledExceptionCommand}"/>
+                            </StackPanel>
+                        </Border>
+
+                        <Border Style="{StaticResource Card}">
+                            <StackPanel>
+                                <TextBlock Text="Division by Zero" Style="{StaticResource SectionHeader}"/>
+                                <TextBlock Style="{StaticResource DescText}">Performs integer division by zero, raising a DivideByZeroException that propagates up uncaught.</TextBlock>
+                                <Button Content="Trigger Division by Zero" Style="{StaticResource DangerButton}"
+                                        HorizontalAlignment="Left"
+                                        Command="{Binding Crash.DivisionByZeroCommand}"/>
+                            </StackPanel>
+                        </Border>
+
+                        <Border Style="{StaticResource Card}">
+                            <StackPanel>
+                                <TextBlock Text="FailFast / Abort" Style="{StaticResource SectionHeader}"/>
+                                <TextBlock Style="{StaticResource DescText}">Calls Environment.FailFast(), which bypasses all managed exception handlers and terminates via the OS fault mechanism. No cleanup code runs.</TextBlock>
+                                <Button Content="Trigger FailFast" Style="{StaticResource DangerButton}"
+                                        HorizontalAlignment="Left"
+                                        Command="{Binding Crash.FailFastCommand}"/>
+                            </StackPanel>
+                        </Border>
+
+                        <Border Style="{StaticResource Card}">
+                            <StackPanel>
+                                <TextBlock Text="Out of Memory" Style="{StaticResource SectionHeader}"/>
+                                <TextBlock Style="{StaticResource DescText}">Allocates 128 MB chunks in a background thread, touching each page to commit physical RAM, until the system runs out of memory. May take minutes on high-RAM machines.</TextBlock>
+                                <Button Content="Trigger Out of Memory" Style="{StaticResource DangerButton}"
+                                        HorizontalAlignment="Left"
+                                        Command="{Binding Crash.OutOfMemoryCommand}"/>
+                            </StackPanel>
+                        </Border>
+                    </StackPanel>
+                </ScrollViewer>
+            </TabItem>
+
+            <!-- ─── HANG TAB ───────────────────────────────────────────────── -->
+            <TabItem Header="🧊 Hang">
+                <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="20,16">
+                    <StackPanel>
+                        <Border Style="{StaticResource WarningBox}">
+                            <TextBlock Foreground="#FF8080" FontSize="12" TextWrapping="Wrap">
+                                Hang scenarios block the UI thread. The window will become unresponsive. Use Task Manager (Ctrl+Shift+Esc) to end the process.
+                            </TextBlock>
+                        </Border>
+
+                        <Border Style="{StaticResource Card}">
+                            <StackPanel>
+                                <TextBlock Text="Sleep Forever" Style="{StaticResource SectionHeader}"/>
+                                <TextBlock Style="{StaticResource DescText}">Calls Thread.Sleep(Infinite) on the UI (Dispatcher) thread. The window stops responding immediately.</TextBlock>
+                                <Button Content="Sleep Forever" Style="{StaticResource DangerButton}"
+                                        HorizontalAlignment="Left"
+                                        Command="{Binding Hang.SleepForeverCommand}"/>
+                            </StackPanel>
+                        </Border>
+
+                        <Border Style="{StaticResource Card}">
+                            <StackPanel>
+                                <TextBlock Text="CPU Spin (UI Thread)" Style="{StaticResource SectionHeader}"/>
+                                <TextBlock Style="{StaticResource DescText}">Spins a tight while(true) loop on the UI thread. Window stops responding and one CPU core runs at 100%.</TextBlock>
+                                <Button Content="Spin Forever" Style="{StaticResource DangerButton}"
+                                        HorizontalAlignment="Left"
+                                        Command="{Binding Hang.SpinForeverCommand}"/>
+                            </StackPanel>
+                        </Border>
+
+                        <Border Style="{StaticResource Card}">
+                            <StackPanel>
+                                <TextBlock Text="Deadlock" Style="{StaticResource SectionHeader}"/>
+                                <TextBlock Style="{StaticResource DescText}">Creates a classic two-lock deadlock. A background thread holds Lock B and waits for Lock A. The UI thread holds Lock A and waits for Lock B. Both wait forever.</TextBlock>
+                                <Button Content="Trigger Deadlock" Style="{StaticResource DangerButton}"
+                                        HorizontalAlignment="Left"
+                                        Command="{Binding Hang.DeadlockCommand}"/>
+                            </StackPanel>
+                        </Border>
+
+                        <Border Style="{StaticResource Card}">
+                            <StackPanel>
+                                <TextBlock Text="Await Task That Never Completes" Style="{StaticResource SectionHeader}"/>
+                                <TextBlock Style="{StaticResource DescText}">Synchronously waits (.GetAwaiter().GetResult()) on a TaskCompletionSource that is never signaled. The UI thread blocks forever.</TextBlock>
+                                <Button Content="Wait Forever" Style="{StaticResource DangerButton}"
+                                        HorizontalAlignment="Left"
+                                        Command="{Binding Hang.TaskNeverCompletesCommand}"/>
+                            </StackPanel>
+                        </Border>
+                    </StackPanel>
+                </ScrollViewer>
+            </TabItem>
+
+            <!-- ─── CPU TAB ────────────────────────────────────────────────── -->
+            <TabItem Header="🔥 CPU">
+                <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="20,16">
+                    <StackPanel>
+                        <Border Style="{StaticResource Card}">
+                            <StackPanel>
+                                <TextBlock Text="CPU Stress" Style="{StaticResource SectionHeader}"/>
+                                <TextBlock Style="{StaticResource DescText}">
+                                    Spawns worker threads that busy-spin for a percentage of each 100ms window, then sleep the remainder. Adjust thread count and load percentage below.
+                                </TextBlock>
+
+                                <Grid Margin="0,8,0,0">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="140"/>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="50"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="32"/>
+                                        <RowDefinition Height="32"/>
+                                    </Grid.RowDefinitions>
+
+                                    <TextBlock Text="Load %" Foreground="{StaticResource TextMuted}" VerticalAlignment="Center"/>
+                                    <Slider Grid.Column="1" Style="{StaticResource DarkSlider}"
+                                            Minimum="1" Maximum="99" TickFrequency="10"
+                                            Value="{Binding Cpu.TargetPercent}" VerticalAlignment="Center"/>
+                                    <TextBlock Grid.Column="2" Text="{Binding Cpu.TargetPercent}" Style="{StaticResource ValueLabel}"/>
+
+                                    <TextBlock Grid.Row="1" Text="Threads" Foreground="{StaticResource TextMuted}" VerticalAlignment="Center"/>
+                                    <Slider Grid.Row="1" Grid.Column="1" Style="{StaticResource DarkSlider}"
+                                            Minimum="1" Maximum="64" TickFrequency="1"
+                                            Value="{Binding Cpu.ThreadCount}" VerticalAlignment="Center"/>
+                                    <TextBlock Grid.Row="1" Grid.Column="2" Text="{Binding Cpu.ThreadCount}" Style="{StaticResource ValueLabel}"/>
+                                </Grid>
+
+                                <StackPanel Orientation="Horizontal" Margin="0,14,0,0">
+                                    <Button Content="Start" Style="{StaticResource GreenButton}"
+                                            Command="{Binding Cpu.StartCommand}"/>
+                                    <Button Content="Stop" Style="{StaticResource NeutralButton}"
+                                            Command="{Binding Cpu.StopCommand}"/>
+                                </StackPanel>
+
+                                <TextBlock Text="{Binding Cpu.StatusText}" Style="{StaticResource StatusText}" Margin="6,10,0,0"/>
+                            </StackPanel>
+                        </Border>
+                    </StackPanel>
+                </ScrollViewer>
+            </TabItem>
+
+            <!-- ─── MEMORY TAB ─────────────────────────────────────────────── -->
+            <TabItem Header="🧠 Memory">
+                <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="20,16">
+                    <StackPanel>
+                        <Border Style="{StaticResource Card}">
+                            <StackPanel>
+                                <TextBlock Text="Memory Pressure" Style="{StaticResource SectionHeader}"/>
+                                <TextBlock Style="{StaticResource DescText}">
+                                    Allocates byte arrays and touches every 4 KB page to commit physical RAM (not just virtual address space). Memory is held until Released.
+                                </TextBlock>
+
+                                <Grid Margin="0,8,0,0">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="140"/>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="80"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Text="Amount (MB)" Foreground="{StaticResource TextMuted}" VerticalAlignment="Center"/>
+                                    <Slider Grid.Column="1" Style="{StaticResource DarkSlider}"
+                                            Minimum="256" Maximum="32768" TickFrequency="256"
+                                            Value="{Binding Memory.TargetMegabytes}" VerticalAlignment="Center"/>
+                                    <TextBlock Grid.Column="2" Style="{StaticResource ValueLabel}"
+                                               Text="{Binding Memory.TargetMegabytes, StringFormat='{}{0} MB'}"/>
+                                </Grid>
+
+                                <StackPanel Orientation="Horizontal" Margin="0,14,0,0">
+                                    <Button Content="Allocate" Style="{StaticResource DangerButton}"
+                                            Command="{Binding Memory.AllocateCommand}"/>
+                                    <Button Content="Release" Style="{StaticResource NeutralButton}"
+                                            Command="{Binding Memory.ReleaseCommand}"/>
+                                </StackPanel>
+
+                                <TextBlock Text="{Binding Memory.AllocatedDisplay}" Style="{StaticResource StatusText}" Margin="6,10,0,0"/>
+                            </StackPanel>
+                        </Border>
+                    </StackPanel>
+                </ScrollViewer>
+            </TabItem>
+
+            <!-- ─── DISK TAB ───────────────────────────────────────────────── -->
+            <TabItem Header="💾 Disk">
+                <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="20,16">
+                    <StackPanel>
+                        <Border Style="{StaticResource Card}">
+                            <StackPanel>
+                                <TextBlock Text="Disk I/O Stress" Style="{StaticResource SectionHeader}"/>
+                                <TextBlock Style="{StaticResource DescText}">
+                                    Continuously writes then reads a temporary file in a background loop. Larger buffer sizes produce higher sequential throughput and visible disk activity in Resource Monitor.
+                                </TextBlock>
+
+                                <StackPanel Orientation="Horizontal" Margin="0,8,0,0" VerticalAlignment="Center">
+                                    <TextBlock Text="Buffer size:" Foreground="{StaticResource TextMuted}" VerticalAlignment="Center" Margin="0,0,12,0"/>
+                                    <ComboBox Style="{StaticResource DarkComboBox}" Width="120"
+                                              ItemsSource="{Binding Disk.BufferSizes}"
+                                              SelectedItem="{Binding Disk.BufferMb}">
+                                        <ComboBox.ItemTemplate>
+                                            <DataTemplate>
+                                                <TextBlock Text="{Binding StringFormat='{}{0} MB'}"/>
+                                            </DataTemplate>
+                                        </ComboBox.ItemTemplate>
+                                    </ComboBox>
+                                </StackPanel>
+
+                                <StackPanel Orientation="Horizontal" Margin="0,14,0,0">
+                                    <Button Content="Start" Style="{StaticResource GreenButton}"
+                                            Command="{Binding Disk.StartCommand}"/>
+                                    <Button Content="Stop" Style="{StaticResource NeutralButton}"
+                                            Command="{Binding Disk.StopCommand}"/>
+                                </StackPanel>
+
+                                <TextBlock Text="{Binding Disk.StatusText}" Style="{StaticResource StatusText}" Margin="6,10,0,0"/>
+                            </StackPanel>
+                        </Border>
+                    </StackPanel>
+                </ScrollViewer>
+            </TabItem>
+
+            <!-- ─── BSOD TAB ───────────────────────────────────────────────── -->
+            <TabItem Header="☠ BSOD">
+                <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="20,16">
+                    <StackPanel>
+                        <Border Background="#1A0000" BorderBrush="#8B0000" BorderThickness="2"
+                                CornerRadius="8" Padding="20" Margin="0,0,0,16">
+                            <StackPanel>
+                                <TextBlock Text="☠  SYSTEM CRASH — POINT OF NO RETURN"
+                                           Foreground="#FF4444" FontSize="16" FontWeight="Bold"
+                                           Margin="0,0,0,10"/>
+                                <TextBlock TextWrapping="Wrap" Foreground="#FF8080" FontSize="13" LineHeight="20">
+                                    Clicking this button calls NtRaiseHardError() with OptionShutdownSystem via ntdll.dll.
+                                    The operating system will immediately produce a blue screen and restart. All unsaved work
+                                    across all applications will be lost. This cannot be cancelled after clicking.
+                                </TextBlock>
+                            </StackPanel>
+                        </Border>
+
+                        <Border Style="{StaticResource Card}">
+                            <StackPanel>
+                                <TextBlock Text="How it works" Style="{StaticResource SectionHeader}"/>
+                                <TextBlock TextWrapping="Wrap" Foreground="{StaticResource TextMuted}" FontSize="12" Margin="0,0,0,12">
+                                    The process acquires SeShutdownPrivilege via AdjustTokenPrivileges, then calls
+                                    NtRaiseHardError(STATUS_ACCESS_DENIED, OptionShutdownSystem=6) in ntdll.dll.
+                                    The NT kernel processes this as a fatal hard error and triggers KeBugCheckEx,
+                                    producing a memory dump and restarting the system.
+                                </TextBlock>
+                                <TextBlock TextWrapping="Wrap" Foreground="{StaticResource TextMuted}" FontSize="12" Margin="0,0,0,12">
+                                    Tip: Test this on a virtual machine first. The BSOD stop code will be
+                                    CRITICAL_PROCESS_DIED (0x000000EF).
+                                </TextBlock>
+
+                                <TextBlock Text="Prerequisite:" Foreground="{StaticResource TextMuted}" FontSize="12" Margin="0,8,0,4"/>
+                                <Border Background="{Binding Bsod.IsAdmin, Converter={StaticResource BoolToColor}}"
+                                        CornerRadius="6" Padding="10,6" HorizontalAlignment="Left">
+                                    <TextBlock FontSize="12" FontWeight="SemiBold" Foreground="White">
+                                        <TextBlock.Text>
+                                            <Binding Path="Bsod.IsAdmin">
+                                                <Binding.Converter>
+                                                    <conv:BoolToStatusTextConverter TrueText="✓  Running as Administrator" FalseText="✗  Not Administrator — BSOD unavailable"/>
+                                                </Binding.Converter>
+                                            </Binding>
+                                        </TextBlock.Text>
+                                    </TextBlock>
+                                </Border>
+
+                                <TextBlock Text="Type BSOD below to confirm:" Foreground="{StaticResource TextMuted}"
+                                           FontSize="12" Margin="0,18,0,6"/>
+                                <TextBox Style="{StaticResource DarkTextBox}" Width="200" HorizontalAlignment="Left"
+                                         Text="{Binding Bsod.ConfirmText, UpdateSourceTrigger=PropertyChanged}"
+                                         IsEnabled="{Binding Bsod.IsAdmin}"/>
+
+                                <Button Content="☠  TRIGGER SYSTEM CRASH" Margin="0,14,0,0"
+                                        HorizontalAlignment="Left"
+                                        Command="{Binding Bsod.TriggerBsodCommand}"
+                                        Style="{StaticResource DangerButton}"
+                                        FontSize="15" Padding="20,10"/>
+                            </StackPanel>
+                        </Border>
+                    </StackPanel>
+                </ScrollViewer>
+            </TabItem>
+        </TabControl>
+
+        <!-- ═══ STATUS BAR ════════════════════════════════════════════════════ -->
+        <Border Grid.Row="2" Background="#0D0D0D" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,1,0,0">
+            <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="16,0">
+                <TextBlock Text="Active:" Foreground="{StaticResource TextMuted}" FontSize="11" VerticalAlignment="Center" Margin="0,0,10,0"/>
+
+                <Border CornerRadius="10" Padding="8,2" Margin="3,0"
+                        Background="{Binding Cpu.IsRunning, Converter={StaticResource BoolToColor}}">
+                    <TextBlock Text="CPU" Foreground="White" FontSize="11" FontWeight="SemiBold"/>
+                </Border>
+
+                <Border CornerRadius="10" Padding="8,2" Margin="3,0"
+                        Background="{Binding Memory.IsAllocated, Converter={StaticResource BoolToColor}}">
+                    <TextBlock Text="MEM" Foreground="White" FontSize="11" FontWeight="SemiBold"/>
+                </Border>
+
+                <Border CornerRadius="10" Padding="8,2" Margin="3,0"
+                        Background="{Binding Disk.IsRunning, Converter={StaticResource BoolToColor}}">
+                    <TextBlock Text="DISK" Foreground="White" FontSize="11" FontWeight="SemiBold"/>
+                </Border>
+
+                <TextBlock Text="{Binding Memory.AllocatedDisplay}" Foreground="{StaticResource TextMuted}"
+                           FontSize="11" VerticalAlignment="Center" Margin="14,0,0,0"/>
+            </StackPanel>
+        </Border>
+    </Grid>
+</Window>
